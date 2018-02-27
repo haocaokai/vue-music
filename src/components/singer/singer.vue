@@ -1,10 +1,6 @@
 <template>
-  <!-- <div class="singer" ref="singer">
-    <list-view @select="selectSinger" :data="singers" ref="list"></list-view>
-    <router-view></router-view>
-  </div> -->
-  <div>
-    singer
+  <div class="singer">
+    
   </div>
 </template>
 
