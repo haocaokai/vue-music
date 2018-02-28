@@ -110,7 +110,7 @@
       }
     },
     destroyed() {
-      clearTimeout(this.timer);
+      clearTimeout(this.timer);     
     }
   }
 </script>

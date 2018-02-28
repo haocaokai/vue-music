@@ -1,6 +1,6 @@
 <template>
   <div class="singer">
-    
+    <Listview :data="singers"></Listview>
   </div>
 </template>
 
@@ -8,6 +8,7 @@
   import {getSingerList} from 'api/singer'
   import {ERR_OK} from 'api/config'
   import Singer from 'common/js/singer'
+  import Listview from 'base/listview/listview'
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LEN = 10
@@ -24,8 +25,7 @@
     methods: {
       _getSingerList(){
         getSingerList().then((res) => {
-          this.singers = res.data.list
-          console.log(this._normalizeSinger(this.singers));
+          this.singers = this._normalizeSinger(res.data.list)
         })
       },
       _normalizeSinger(list) {
@@ -39,12 +39,12 @@
         list.forEach((item, index) => {
           if(index < HOT_SINGER_LEN) {
             map.hot.items.push(new Singer({
-              id: item.Fsinger_mid,
-              name: item.Fsinger_name
+              name: item.Fsinger_name,
+              id: item.Fsinger_mid
             }))
           }
 
-          const key = item.Findex
+          let key = item.Findex
 
           if(!map[key]) {
             map[key] = {
@@ -53,19 +53,22 @@
             }
           }
           map[key].items.push(new Singer({
-            id: item.Fsinger_mid,
-            name: item.Fsinger_name
+            name: item.Fsinger_name,
+            id: item.Fsinger_mid
           }))
         })
 
+
+        // 对象遍历是无序的，此处处理为有序列表
         let ret = []
         let hot = []
 
         for(let key in map) {
           let val = map[key]
-          if(val.title.match(/[a-zA-Z]/)) {
+
+          if(val.title.match(/[a-zA-z]/)) {
             ret.push(val)
-          }else if(val.title === HOT_NAME){
+          }else if(val.title === HOT_NAME) {
             hot.push(val)
           }
         }
@@ -76,6 +79,9 @@
 
         return hot.concat(ret)
       }
+    },
+    components: {
+      Listview
     }
   }
 </script>
