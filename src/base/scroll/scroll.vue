@@ -19,6 +19,10 @@
       data: {
         type: Array,
         default: true
+      },
+      listenScroll: {
+        type: Boolean,
+        default: false
       }
     },
     mounted(){
@@ -32,6 +36,13 @@
           probeType: this.probeType,
           click: this.click
         })
+
+        if(this.listenScroll) {
+          let _this = this
+          this.scroll.on('scroll', (pos) => {
+            _this.$emit('scroll', pos)          // 向父级派发scroll事件
+          })
+        }
       },
       refresh() {
         this.scroll && this.scroll.refresh();

@@ -1,5 +1,11 @@
 <template>
-  <scroll class="listview" :data="data"  ref="listview">
+  <scroll class="listview" 
+          :data="data"  
+          ref="listview"
+          :listenScroll="listenScroll"
+          :probeType='probeType'
+          @scroll="scroll"
+  >
     <ul>
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
@@ -14,7 +20,11 @@
 
     <div class="list-shortcut" @touchstart="onShortCutTouchStart" @touchmove.stop.prevent="onShortCutTouchMove">
       <ul>
-        <li v-for="(item, index) in shortcutList" class="item" :data-index="index">{{item}}</li>
+        <li v-for="(item, index) in shortcutList" 
+            class="item" 
+            :data-index="index"
+            :class="{'current': currentIndex === index}"
+        >{{item}}</li>
       </ul>
     </div>
   </scroll>
@@ -27,6 +37,16 @@
   export default {
     created() {
       this.touch = {}
+      this.listenScroll = true
+      this.probeType = 3
+      // this.scrollY = -1
+      // this.heightList = []
+    },
+    data() {
+      return {
+        scrollY: -1,
+        currentIndex: 0
+      }
     },
     props: {
       data: {
@@ -47,7 +67,7 @@
         let firstTouch = e.touches[0]
         this.touch.y1 = firstTouch.pageY
         this.touch.anchorIndex = anchorIndex
-        this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex])
+        this._scrollTo(anchorIndex)
       },
       onShortCutTouchMove(e) {
         // 判断移动时距离 / 每个字母高度，得到detal，再据此移动到目标分类
@@ -56,11 +76,55 @@
         this.touch.y2 = firstTouch.pageY
         let detal = Math.floor((this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT)
         let anchorIndex = parseInt(this.touch.anchorIndex) + detal
-        this.$refs.listview.scrollToElement(this.$refs.listGroup[anchorIndex])
+        this._scrollTo(anchorIndex)
+      },
+      scroll(pos) {
+        this.scrollY = pos.y          // 获得滑动距离
+      },
+      _scrollTo(index) {
+        this.$refs.listview.scrollToElement(this.$refs.listGroup[index])
+
+      },
+      _calculateHeight() {
+        let height = 0
+        let listGroup = this.$refs.listGroup
+        this.heightList = []
+        this.heightList.push(height)
+
+        for(let i=0; i<listGroup.length; i++) {
+          let item = listGroup[i]
+          height += item.clientHeight
+
+          this.heightList.push(height)
+
+        }
+
+        console.log(this.heightList)
       }
     },
     components: {
       scroll
+    },
+    watch: {
+      data() {
+        setTimeout(() => {
+          this._calculateHeight()
+        },20)
+      },
+      scrollY(newY) {
+        let heightList = this.heightList
+        for(let i=0; i<heightList.length; i++) {
+          let height1 = heightList[i]
+          let height2 = heightList[i + 1]
+
+          if(-newY >= height1 && -newY < height2) {
+            this.currentIndex = i
+            return
+          }
+
+          this.currentIndex = 0
+        }
+      }
     }
   }
 </script>
