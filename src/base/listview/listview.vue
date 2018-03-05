@@ -10,7 +10,7 @@
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="item in group.items" class="list-group-item">
+          <li @click="selectItem(item)" v-for="item in group.items" class="list-group-item">
             <img v-lazy="item.avatar" class="avatar">
             <span class="name">{{item.name}}</span>
           </li>
@@ -28,8 +28,12 @@
       </ul>
     </div>
 
-    <div class="list-fixed" v-show="fixedTitle">
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
       <h2 class="fixed-title">{{fixedTitle}}</h2>
+    </div>
+
+    <div class="loading-container" v-show="!data.length">
+      <loading></loading>
     </div>
   </scroll>
 </template>
@@ -37,19 +41,22 @@
 <script>
   import scroll from 'base/scroll/scroll'
   import {getData} from 'common/js/dom'
+  import loading from 'base/loading/loading'
+
+  const ANCHOR_HEIGHT = 18
+  const FIXED_TITLE_HEIGHT = 30
 
   export default {
     created() {
       this.touch = {}
       this.listenScroll = true
       this.probeType = 3
-      // this.scrollY = -1
-      // this.heightList = []
     },
     data() {
       return {
         scrollY: -1,
         currentIndex: 0,
+        diff: -1
       }
     },
     props: {
@@ -72,6 +79,9 @@
       }
     },
     methods: {
+      selectItem(item) {
+        this.$emit('select', item)
+      },
       onShortCutTouchStart(e) {
         let anchorIndex = getData(e.target, 'index')
         let firstTouch = e.touches[0]
@@ -81,7 +91,6 @@
       },
       onShortCutTouchMove(e) {
         // 判断移动时距离 / 每个字母高度，得到detal，再据此移动到目标分类
-        const ANCHOR_HEIGHT = 18
         let firstTouch = e.touches[0]
         this.touch.y2 = firstTouch.pageY
         let detal = Math.floor((this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT)
@@ -108,18 +117,28 @@
           this.heightList.push(height)
 
         }
-
-        console.log(this.heightList)
       }
     },
     components: {
-      scroll
+      scroll,
+      loading
     },
     watch: {
       data() {
         setTimeout(() => {
           this._calculateHeight()
         },20)
+      },
+      diff(newVal) {
+        let fixedTop = (newVal > 0 && newVal < FIXED_TITLE_HEIGHT) ? newVal - FIXED_TITLE_HEIGHT : 0
+
+        if(this.fixedTop === fixedTop) {
+          return
+        }
+
+        this.fixedTop = fixedTop
+        this.$refs.fixed.style.transform = `translate3d(0, ${fixedTop}px, 0)`   //开启GPU加速
+        // this.$refs.fixed.style.top = `${fixedTop}px`
       },
       scrollY(newY) {
         let heightList = this.heightList
@@ -129,6 +148,7 @@
 
           if(-newY >= height1 && -newY < height2) {
             this.currentIndex = i
+            this.diff = newY + height2
             return
           }
 
