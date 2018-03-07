@@ -5,6 +5,12 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImg">
+      <div class="play-wrapper">
+        <div class="play" v-show="songs.length>0" ref="playBtn">
+          <i class="icon-play"></i>
+          <span class="text">随机播放全部</span>
+        </div>
+      </div>
       <div class="filter"></div>
     </div>
   
@@ -66,7 +72,7 @@
     },
     methods: {
       back() {
-        this.$router.go(-1)
+        this.$router.back()
       },
       scroll(pos) {
         this.scrollY = pos.y
@@ -79,17 +85,44 @@
     },
     watch: {
       scrollY(newY) {
+        let zIndex = 0
+        let scale = 1
+        let blur = 0
         let translateY = Math.max(this.minTranslateY, newY)
         if(this.translateY === translateY){
           return
         }
         this.translateY = translateY
 
-        let filterBlur = Math.ceil(-translateY / 10)
+        const percent = Math.abs(newY / this.bgImgHeight)
 
-        this.$refs.bgImg.style.filter = `blur(${filterBlur}px)`
-        this.$refs.layer.style.transform = `translate3d(0, ${translateY}px, 0)`
+        if(newY > 0) {
+          scale = 1 + percent
+          zIndex = 10
+        }else{
+          blur = Math.min(20*percent, 20)
+        }
 
+        this.$refs.bgImg.style['transform'] = `scale(${scale})`
+        this.$refs.bgImg.style['webkitTransform'] = `scale(${scale})`
+
+        this.$refs.bgImg.style['backdrop-filter'] = `blur(${blur}px)`
+        this.$refs.bgImg.style['webkitBackdrop-filter'] = `blur(${blur}px)`
+
+        this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`
+        this.$refs.layer.style['webkitTransform'] = `translate3d(0, ${translateY}px, 0)`
+
+        if(newY < this.minTranslateY) {
+          zIndex = 10
+          this.$refs.bgImg.style.paddingTop = 0
+          this.$refs.bgImg.style.height = 40 + 'px'
+          this.$refs.playBtn.style.display = 'none'
+        }else{
+          this.$refs.bgImg.style.paddingTop = '70%'
+          this.$refs.bgImg.style.height = 0
+          this.$refs.playBtn.style.display = ''
+        }
+        this.$refs.bgImg.style.zIndex = zIndex
       }
     },
     components: {
