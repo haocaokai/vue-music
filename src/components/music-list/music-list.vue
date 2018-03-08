@@ -24,7 +24,7 @@
             @scroll="scroll"
     >
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list @select="selectItem" :songs="songs"></song-list>
       </div>
 
        <div class="loading-container" v-show="!songs.length">
@@ -40,6 +40,7 @@
   import scroll from 'base/scroll/scroll'
   import songList from 'base/song-list/song-list'
   import loading from 'base/loading/loading'
+  import {mapActions} from 'vuex'
 
   export default {
     props: {
@@ -68,7 +69,7 @@
     computed: {
       bgStyle() {
         return `background-image: url(${this.bgImage})`
-      }
+      },
     },
     methods: {
       back() {
@@ -76,7 +77,16 @@
       },
       scroll(pos) {
         this.scrollY = pos.y
-      }
+      },
+      selectItem(item, index) {
+        this.selectPlay({
+          list: this.songs,
+          index: index
+        })
+      },
+      ...mapActions([
+        'selectPlay'
+      ])
     },
     mounted() {
       this.bgImgHeight = this.$refs.bgImg.clientHeight
