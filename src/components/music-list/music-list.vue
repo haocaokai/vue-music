@@ -37,9 +37,9 @@
 </template>
 
 <script>
-  import scroll from 'base/scroll/scroll'
+  import Scroll from 'base/scroll/scroll'
   import songList from 'base/song-list/song-list'
-  import loading from 'base/loading/loading'
+  import Loading from 'base/loading/loading'
   import {mapActions} from 'vuex'
 
   export default {
@@ -136,13 +136,11 @@
       }
     },
     components: {
-      scroll,
+      Scroll,
       songList,
-      loading
+      Loading
     }
   }
-
-
 </script>
 
 

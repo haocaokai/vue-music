@@ -46,6 +46,7 @@
         position: absolute
         height: 100%
         background: $color-theme
+        border-radius 20px
       .progress-btn-wrapper
         position: absolute
         left: -8px
