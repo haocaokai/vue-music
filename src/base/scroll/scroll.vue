@@ -32,6 +32,9 @@
     },
     methods: {
       _initScroll() {
+        if(!this.$refs.wrapper) {
+          return
+        }
         this.scroll = new BScorll(this.$refs.wrapper, {
           probeType: this.probeType,
           click: this.click
