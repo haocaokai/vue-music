@@ -30,12 +30,16 @@
               <div class="playing-lyric"></div>
             </div>
           </div>
-          
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
             <div class="lyric-wrapper">
-              <div>
-                <p class="text"></p>
+              <div v-if="currentLyric">
+                <p class="text" 
+                   :class="{'current': currentLineNum === index}"
+                   ref="lyricLine"
+                   v-for="(line, index) in currentLyric.lines">{{line.txt}}</p>
               </div>
             </div>
+          </scroll>
         </div>
 
         <div class="bottom">
@@ -110,14 +114,17 @@
   import ProgressCircle from 'base/progress-circle/progress-circle'
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
-
+  import Lyric from 'lyric-parser'
+  import Scroll from 'base/scroll/scroll'
 
   export default {
     data() {
       return {
         songReady: false,
         currentTime: 0,
-        radius: 32
+        radius: 32,
+        currentLyric: null,
+        currentLineNum: 0
       }
     },
     computed: {
@@ -277,6 +284,22 @@
         })
         this.setCurrentIndex(index)
       },
+      getLyric() {
+        this.currentSong.getLyric().then((lyric) => {
+          this.currentLyric = new Lyric(lyric, this.handleLyric)
+            
+          if(this.playing) {
+            this.currentLyric.play()
+          }
+          
+        })
+      },
+      handleLyric({lineNum, txt}) {
+        this.currentLineNum = lineNum
+        if(lineNum > 5) {
+          
+        }
+      },
       _pad(num, n=2) {
         let len = num.toString().length
         
@@ -315,20 +338,22 @@
         if(newSong.id === oldSong.id) {
           return
         }
-        setTimeout(() => {
+        this.$nextTick(() => {
           this.$refs.audio.play()
-        }, 20)
+          this.getLyric()
+        })
       },
       playing(newPlaying) {
         const audio = this.$refs.audio
-        setTimeout(() => {
+        this.$nextTick(() => {
           newPlaying ? audio.play() : audio.pause()
         })
       }
     },
     components: {
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Scroll
     }
     
   }
