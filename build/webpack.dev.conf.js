@@ -66,8 +66,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         }).catch((e) => {
           console.log(e)
         })
-      })
-      
+      }),
     },
     clientLogLevel: 'warning',
     historyApiFallback: {
