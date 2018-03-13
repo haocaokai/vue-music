@@ -41,8 +41,10 @@
   import songList from 'base/song-list/song-list'
   import Loading from 'base/loading/loading'
   import {mapActions} from 'vuex'
+  import {playlistMixin} from 'common/js/mixin'
 
   export default {
+    mixins: [playlistMixin],
     props: {
       songs: {
         type: Array,
@@ -72,6 +74,11 @@
       },
     },
     methods: {
+      handlePlaylist(playlist) {
+        const bottom = playlist.length > 0 ? '60px' : ''
+        this.$refs.list.$el.style.bottom = bottom
+        this.$refs.list.refresh()
+      },
       back() {
         this.$router.back()
       },
