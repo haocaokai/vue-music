@@ -1,19 +1,22 @@
 <template>
   <div class="rank" ref="rank">
-    <div class="toplist">
+    <scroll :data="topList" class="toplist" ref="toplist">
       <ul>
-        <li class="item">
+        <li class="item" v-for="(item, index) in topList" @select="selectItem(item)">
           <div class="icon">
-            <img width="100" height="100">
+            <img width="100" height="100" v-lazy="item.picUrl">
           </div>
           <ul class="songlist">
-            <li class="song">
-              <span></span>
-              <span></span>
+            <li class="song" v-for="(song, index) in item.songList">
+              <span>{{index+1}}</span>
+              <span>{{song.songname}}-{{song.singername}}</span>
             </li>
           </ul>
         </li>
       </ul>
+    </scroll>
+    <div class="loading-container">
+      <loading v-show="!topList.length"></loading>
     </div>
     <router-view></router-view>
   </div>
@@ -21,7 +24,48 @@
 
 
 <script>
-  
+  import {getTopList} from 'api/rank'
+  import {ERR_OK} from 'api/config'
+  import Scroll from 'base/scroll/scroll'
+  import Loading from 'base/loading/loading'
+  import {playlistMixin} from 'common/js/mixin'
+
+  export default {
+    mixins: [playlistMixin],
+    data() {
+      return {
+        topList: []
+      }
+    },
+    created() {
+      this._getTopList()
+    },
+    methods: {
+      selectItem(item) {
+        this.$router.push({
+          path: '/'
+        })
+      },
+      handlePlaylist(topList) {
+        const bottom = topList.length > 0 ? '60px' : ''
+        this.$refs.rank.style.bottom = bottom
+        this.$refs.toplist.refresh()
+      },
+      _getTopList() {
+        getTopList().then((res) => {
+          if(res.code === ERR_OK) {
+            this.topList = res.data.topList
+            console.log(this.topList)
+          }
+        })
+      }
+    },
+    components: {
+      Scroll,
+      Loading
+    }
+  }
+
 </script>
 
 
