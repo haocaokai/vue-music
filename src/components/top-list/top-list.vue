@@ -43,13 +43,14 @@
         }
         getMusicList(this.topList.id).then((res) => {
           this.songs = this._normalizeSongs(res.songlist)
+          
         })
       },
-      _normalizeSongs(list) {       // 拿到数据后做标准化处理
+      _normalizeSongs(list) {     
         let ret = []
 
         list.forEach((item) => {
-          let musicData = item.data        // ES6 解构赋值
+          let musicData = item.data      
           if(musicData.songid && musicData.albummid) {
             ret.push(createSons(musicData))
           }
